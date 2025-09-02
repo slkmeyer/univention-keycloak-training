@@ -1,12 +1,15 @@
-# univention-keycloak-training
-Konfigurationsbefehl zum Kopieren aus der Keycloak-Schulung von Univention.
+# Konfigurationsübung für die Keycloak-App von Univention
 
-Aufgabe: In der Standard-Konfiguration der Trainingsumgebung ist das Univention Portal unter ``https://dn1.training.ucs`` und der Keycloak IdP unter ``https://ucs-sso-ng.training.ucs`` erreichar.
+Dieses Repo enthält nur ein README.md mit Konfigurationsbefehlen zum Kopieren für die Keycloak-Schulung von Univention.
+
+Aufgabe: In der Standard-Konfiguration der Trainingsumgebung ist das Univention Portal unter ``https://dn1.training.ucs`` und der Keycloak IdP unter ``https://ucs-sso-ng.training.ucs`` erreichbar.
+Die aus dem Univention-Appcenter installierte Nextcloud-App (UCS 5.0) ist standardmäßig unter ``https://dn1.training.ucs/nextcloud` zu finden.
 Diese Konfiguration soll dahingehend verändert werden, dass
 
 * das Univention-Portal jeder Schulungsinstanz von außen unter ``studentxx.univention.de`` erreichbar ist,
 * die Keycloak-App jeder Schulungsinstanz von außen unter ``loginxx.univention.de`` erreichbar ist,
-* beide Dienste mit TLS-Zertifikaten von Letsencrypt abgesichert sind.
+* beide Dienste mit TLS-Zertifikaten von Letsencrypt abgesichert sind,
+* ein Login für das Portal und die Nextcloud-App über Keycloak (SAML 2.0) möglich ist.
 
 ## Definition der Domainnamen
 
@@ -16,6 +19,7 @@ Fügen Sie statt `xx` die Nummer Ihrer Instanz ein.
 ```bash
 PORTAL_FQDN="studentxx.univention.de"
 SSO_FQDN="loginxx.univention.de"
+NEXTCLOUD_FQDN="studentxx.univention.de"
 ```
 
 ## Letsencrypt-Zertifikat holen
@@ -98,4 +102,41 @@ Optional kann verhindert werden, dass Logins gegen OpenLDAP an Keycloak vorbei m
 ```bash
 ucr set umc/login/links/login_without_sso/enabled=false
 ucr set portal/auth-mode=saml
+```
+
+## Umkonfiguration der Nextcloud als SAML-SP
+
+* Der neue, von außen erreichbare FQDN muss in der Nextcloud-Konfiguration als vertrauenswürdig hinterlegt werden:
+
+```bash
+univention-app shell nextcloud sudo -u www-data php /var/www/html/occ config:system:set trusted_domains 2 --value ${NEXTCLOUD_FQDN}
+```
+
+* Das öffentliche Zertifikat für die SAML-Kommunikation aus Keycloak holen
+
+```bash
+univention-keycloak saml/idp/cert get --as-pem --output "/tmp/keycloak.cert"
+```
+
+* Die Keycloak-URL auslesen:
+
+```bash
+SSO_URL=`univention-keycloak get-keycloak-base-url`
+```
+
+* Änderung der Konfiguration der Nextcloud-Erweiterung "user_saml":
+
+```bash
+univention-app shell nextcloud sudo -u www-data /var/www/html/occ saml:config:set --idp-x509cert="$(cat /tmp/keycloak.cert)" --general-uid_mapping="uid" --idp-singleLogoutService.url="${SSO_URL}/realms/ucs/protocol/saml" --idp-singleSignOnService.url="${SSO_URL}/realms/ucs/protocol/saml" --idp-entityId="${SSO_URL}/realms/ucs" 1
+```
+
+* Prüfung:
+
+```bash
+univention-app shell nextcloud sudo -u www-data /var/www/html/occ saml:config:get
+```
+
+* Anlegen eines SAML-SP für Nextcloud in Keycloak
+```bash
+univention-keycloak saml/sp create --metadata-url="https://${NEXTCLOUD_FQDN}/nextcloud/apps/user_saml/saml/metadata" --role-mapping-single-value
 ```
