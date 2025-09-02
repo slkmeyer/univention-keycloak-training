@@ -3,7 +3,7 @@
 Dieses Repo enthält nur ein README.md mit Konfigurationsbefehlen zum Kopieren für die Keycloak-Schulung von Univention.
 
 Aufgabe: In der Standard-Konfiguration der Trainingsumgebung ist das Univention Portal unter ``https://dn1.training.ucs`` und der Keycloak IdP unter ``https://ucs-sso-ng.training.ucs`` erreichbar.
-Die aus dem Univention-Appcenter installierte Nextcloud-App (UCS 5.0) ist standardmäßig unter ``https://dn1.training.ucs/nextcloud` zu finden.
+Die aus dem Univention-Appcenter installierte Nextcloud-App (UCS 5.0) ist standardmäßig unter ``https://dn1.training.ucs/nextcloud`` zu finden.
 Diese Konfiguration soll dahingehend verändert werden, dass
 
 * das Univention-Portal jeder Schulungsinstanz von außen unter ``studentxx.univention.de`` erreichbar ist,
