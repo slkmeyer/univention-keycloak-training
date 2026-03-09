@@ -6,8 +6,8 @@ Aufgabe: In der Standard-Konfiguration der Trainingsumgebung ist das Univention 
 Die aus dem Univention-Appcenter installierte Nextcloud-App (UCS 5.0) ist standardmäßig unter ``https://dn1.training.ucs/nextcloud`` zu finden.
 Diese Konfiguration soll dahingehend verändert werden, dass
 
-* das Univention-Portal jeder Schulungsinstanz von außen unter ``studentxx.univention.de`` erreichbar ist,
-* die Keycloak-App jeder Schulungsinstanz von außen unter ``loginxx.univention.de`` erreichbar ist,
+* das Univention-Portal jeder Schulungsinstanz von außen unter ``pxx.service-univention.de`` erreichbar ist,
+* die Keycloak-App jeder Schulungsinstanz von außen unter ``lxx.service-univention.de`` erreichbar ist,
 * beide Dienste mit TLS-Zertifikaten von Letsencrypt abgesichert sind,
 * ein Login für das Portal und die Nextcloud-App über Keycloak (SAML 2.0) möglich ist.
 
