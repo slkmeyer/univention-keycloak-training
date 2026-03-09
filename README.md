@@ -17,15 +17,15 @@ Für die unten folgenden Befehle setzen Sie bitte eingangs einmalig die vollqual
 Fügen Sie statt `xx` die Nummer Ihrer Instanz ein.
 
 ```bash
-PORTAL_FQDN="studentxx.univention.de"
-SSO_FQDN="loginxx.univention.de"
-NEXTCLOUD_FQDN="studentxx.univention.de"
+PORTAL_FQDN="pxx.service-univention.de" # "p" für Portal
+SSO_FQDN="lxx.service-univention.de" # "l" für Login
+NEXTCLOUD_FQDN="pxx.service-univention.de"
 ```
 
 ## Letsencrypt-Zertifikat holen
 
 ```bash
-# univention-app install letsencrypt # (hier vorinstalliert)
+univention-app install letsencrypt
 univention-app configure letsencrypt --set letsencrypt/domains="${PORTAL_FQDN} ${SSO_FQDN}" letsencrypt/services/apache2=True
 systemctl restart apache2
 ```
@@ -39,6 +39,12 @@ univention-app configure keycloak --set \
   keycloak/apache2/ssl/certificate="/etc/univention/letsencrypt/signed_chain.crt" \
   keycloak/apache2/ssl/key="/etc/univention/letsencrypt/domain.key" \
   keycloak/csp/frame-ancestors="https://${PORTAL_FQDN} https://${SSO_FQDN}"
+```
+
+## Änderung des zuständigen IdP für die Anmeldung am Portal
+
+```bash
+ucr set umc/saml/idp-server="https://${SSO_FQDN}/realms/ucs/protocol/saml/descriptor"
 ```
 
 ## Änderung des Portal-Hostname
@@ -72,12 +78,6 @@ univention-run-join-scripts \
 ```bash
 openssl s_client -connect ${PORTAL_FQDN}:443 | openssl x509 -noout -subject -issuer
 openssl s_client -connect ${SSO_FQDN}:443 | openssl x509 -noout -subject -issuer
-```
-
-## Änderung des zuständigen IdP für die Anmeldung am Portal
-
-```bash
-ucr set umc/saml/idp-server="https://${SSO_FQDN}/realms/ucs/protocol/saml/descriptor"
 ```
 
 ## Aktivierung der SSO-Kachel im Portal
